@@ -1,17 +1,28 @@
-/*
- * 图片压缩
- * img   原始图片
- * width  压缩后的宽度
- * height  压缩后的高度
- * ratio  压缩比率
- */
-export function compress(img, width, height, ratio) {
-	let canvas, ctx, img64;
-	canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
-	ctx = canvas.getContext('2d');
-	ctx.drawImage(img, 0, 0, width, height);
-	img64 = canvas.toDataURL('image/jpeg', ratio);
-	return img64;
+import imageCompression from '../../lib/index';
+
+async function handleCompressFile(imageFile) {
+	console.log(imageFile);
+	if (!(imageFile instanceof Blob)) {
+		console.error('请传入一个blob文件');
+		return;
+	}
+	console.log('originalFile instanceof Blob', imageFile instanceof Blob); // true
+	console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+	let compressedFile = null;
+	// https://www.npmjs.com/package/browser-image-compression 对应api在这里
+	const options = {
+		maxSizeMB: 1,
+		maxWidthOrHeight: 1920,
+		// useWebWorker: true
+	};
+	try {
+		compressedFile = await imageCompression(imageFile, options);
+		console.log('compressedFile instanceof Blob', compressedFile instanceof Blob); // true
+		console.log(`compressedFile size ${compressedFile.size / 1024 / 1024} MB`); // smaller than maxSizeMB
+	} catch (error) {
+		console.log(error);
+	}
+	return compressedFile;
 }
+
+export { handleCompressFile };
